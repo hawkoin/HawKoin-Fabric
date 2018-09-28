@@ -449,4 +449,9 @@ describe('#' + namespace, () => {
 
     });
 
+    it('Conduct high txn volume and ensure the total funds in network stays consistent');
+
+    it('Delete funds more than the balance');
+
+
 });
