@@ -453,5 +453,7 @@ describe('#' + namespace, () => {
 
     it('Delete funds more than the balance');
 
+    it('Verify permissions. Only admin should be allowed to read/write to blockchain.');
+
 
 });
