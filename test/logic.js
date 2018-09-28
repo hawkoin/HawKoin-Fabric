@@ -388,4 +388,65 @@ describe('#' + namespace, () => {
         businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Students cannot trade with other Students.');
     });
 
+    it('Reject transactions that exceed user balance', async () => {
+        await useIdentity(adminCardName);
+
+        const student1 = await studentRegistry.get('student1');
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = student1.balance + 50;
+        transaction.fromUser = factory.newRelationship(namespace, studentType, 'student1');
+        transaction.toUser = factory.newRelationship(namespace, vendorType, 'vendor1');
+
+        await businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction failed. Insufficient funds.');
+    });
+
+    it('Accept valid transactions', async () => {
+        await useIdentity(adminCardName);
+
+        const student1Before = await studentRegistry.get('student1');
+        const administrator1Before = await administratorRegistry.get('administrator1');
+        const faculty1Before = await facultyRegistry.get('faculty1');
+
+        const vendor1Before = await vendorRegistry.get('vendor1');
+
+        const amtToSend = Math.min(student1Before.balance, administrator1Before.balance, faculty1Before.balance)/2;
+        amtToSend.should.be.greaterThan(1);
+
+        const transaction1 = factory.newTransaction(namespace, 'TransferFunds');
+        transaction1.amount = amtToSend;
+        transaction1.fromUser = factory.newRelationship(namespace, studentType, 'student1');
+        transaction1.toUser = factory.newRelationship(namespace, vendorType, 'vendor1');
+
+        const transaction2 = factory.newTransaction(namespace, 'TransferFunds');
+        transaction2.amount = amtToSend;
+        transaction2.fromUser = factory.newRelationship(namespace, facultyType, 'faculty1');
+        transaction2.toUser = factory.newRelationship(namespace, vendorType, 'vendor1');
+
+        const transaction3 = factory.newTransaction(namespace, 'TransferFunds');
+        transaction3.amount = amtToSend;
+        transaction3.fromUser = factory.newRelationship(namespace, administratorType, 'administrator1');
+        transaction3.toUser = factory.newRelationship(namespace, vendorType, 'vendor1');
+
+
+        await businessNetworkConnection.submitTransaction(transaction1);
+        await businessNetworkConnection.submitTransaction(transaction2);
+        await businessNetworkConnection.submitTransaction(transaction3);
+
+        const student1After = await studentRegistry.get('student1');
+        student1After.balance.should.equal(student1Before.balance-amtToSend);
+
+        const administrator1After = await administratorRegistry.get('administrator1');
+        administrator1After.balance.should.equal(administrator1Before.balance-amtToSend);
+
+        const faculty1After = await facultyRegistry.get('faculty1');
+        faculty1After.balance.should.equal(faculty1Before.balance-amtToSend);
+
+        const vendor1After = await vendorRegistry.get('vendor1');
+        vendor1After.balance.should.equal(vendor1Before.balance+(3*amtToSend));
+
+
+
+    });
+
 });
