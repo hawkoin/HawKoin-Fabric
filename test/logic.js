@@ -14,7 +14,7 @@
 
 'use strict';
 /**
- * Write the unit tests for your transction processor functions here
+ * HawKoin Unit Tests
  */
 
 const AdminConnection = require('composer-admin').AdminConnection;
@@ -27,8 +27,7 @@ chai.should();
 chai.use(require('chai-as-promised'));
 
 const namespace = 'org.hawkoin.network';
-//const assetType = 'SampleAsset';
-//const assetNS = namespace + '.' + assetType;
+
 const genericUserType = 'User';
 const genericUserNS = namespace + '.' + genericUserType;
 
