@@ -1,7 +1,5 @@
 
-
 import json
-import csv
 import requests
 import sys, getopt
 
@@ -12,31 +10,11 @@ def main(argv):
     
     try:
         response = requests.get(url)
+
         json_string = response.json()
-        # print(json_string)
         formatted_json = json.dumps(json_string, sort_keys=True, indent=4, separators=(',',': '))
-        #print(formatted_json)
-        
-        j = json.loads(formatted_json)
 
-        f = csv.writer(open('../Reports/Faculty_Summary.csv', 'wb+'))
-        #f.writerow()
-        thing = {'first_name': 'Baked', 'last_name': 'Beans'}
-
-        for row in j: 
-            f.writerow(thing)
-
-        # count = 0
-        # for item in formatted_json:
-        #     if count == 0:
-        #         header = item.keys()
-        #         f.writerow(header)
-        #         count += 1
-        #     f.writerow(item.values())
-
-        #print(formatted_json)
-
-        #f.close()
+        print(formatted_json)
         
     except requests.exceptions.Timeout:
         # Maybe set up for a retry, or continue in a retry loop
@@ -48,6 +26,11 @@ def main(argv):
         # catastrophic error. bail.
         print (e)
         sys.exit(1)
+    except:
+        print("*** Key not found ***")
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])
+    
+

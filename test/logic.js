@@ -168,12 +168,16 @@ describe('#' + namespace, () => {
         administrator1.balance = 100.00;
         administrator1.isActive = true;
         administrator1.accessLevel = 'ADMIN';
+        administrator1.lowBalThreshold = 5.00;
+        administrator1.txnThreshold = 100.00;
         administrator1.contactInfo = emptyContactInfo;
 
         const administrator2 = factory.newResource(namespace,administratorType, 'administrator2');
         administrator2.balance = 100.00;
         administrator2.isActive = true;
         administrator2.accessLevel = 'ADMIN';
+        administrator2.lowBalThreshold = 5.00;
+        administrator2.txnThreshold = 100.00;
         administrator2.contactInfo = emptyContactInfo;
 
         const faculty1 = factory.newResource(namespace,facultyType, 'faculty1');
@@ -181,6 +185,8 @@ describe('#' + namespace, () => {
         faculty1.balance = 100.00;
         faculty1.isActive = true;
         faculty1.accessLevel = 'FACULTY';
+        faculty1.lowBalThreshold = 5.00;
+        faculty1.txnThreshold = 100.00;
         faculty1.contactInfo = emptyContactInfo;
 
         const faculty2 = factory.newResource(namespace,facultyType, 'faculty2');
@@ -188,6 +194,8 @@ describe('#' + namespace, () => {
         faculty2.balance = 100.00;
         faculty2.isActive = true;
         faculty2.accessLevel = 'FACULTY';
+        faculty2.lowBalThreshold = 5.00;
+        faculty2.txnThreshold = 100.00;
         faculty2.contactInfo = emptyContactInfo;
 
         const vendor1 = factory.newResource(namespace, vendorType, 'vendor1');
@@ -196,6 +204,8 @@ describe('#' + namespace, () => {
         vendor1.balance = 100.00;
         vendor1.isActive = true;
         vendor1.accessLevel = 'VENDOR';
+        vendor1.lowBalThreshold = 5.00;
+        vendor1.txnThreshold = 100.00;
         vendor1.contactInfo = emptyContactInfo;
 
         const vendor2 = factory.newResource(namespace, vendorType, 'vendor2');
@@ -204,7 +214,19 @@ describe('#' + namespace, () => {
         vendor2.balance = 100.00;
         vendor2.isActive = true;
         vendor2.accessLevel = 'VENDOR';
+        vendor2.lowBalThreshold = 5.00;
+        vendor2.txnThreshold = 100.00;
         vendor2.contactInfo = emptyContactInfo;
+
+        const vendorInnactive = factory.newResource(namespace, vendorType, 'vendorInnactive');
+        vendorInnactive.vendorName = 'InnactiveVendor';
+        vendorInnactive.ccr = 'MONTHLY';
+        vendorInnactive.balance = 100.00;
+        vendorInnactive.isActive = false;
+        vendorInnactive.accessLevel = 'VENDOR';
+        vendorInnactive.lowBalThreshold = 5.00;
+        vendorInnactive.txnThreshold = 100.00;
+        vendorInnactive.contactInfo = emptyContactInfo;
 
         const student1 = factory.newResource(namespace, studentType, 'student1');
         student1.isAthlete = false;
@@ -212,6 +234,8 @@ describe('#' + namespace, () => {
         student1.balance = 100.00;
         student1.isActive = true;
         student1.accessLevel = 'STUDENT';
+        student1.lowBalThreshold = 5.00;
+        student1.txnThreshold = 100.00;
         student1.contactInfo = emptyContactInfo;
 
         const student2 = factory.newResource(namespace, studentType, 'student2');
@@ -220,12 +244,24 @@ describe('#' + namespace, () => {
         student2.balance = 100.00;
         student2.isActive = true;
         student2.accessLevel = 'STUDENT';
+        student2.lowBalThreshold = 5.00;
+        student2.txnThreshold = 100.00;
         student2.contactInfo = emptyContactInfo;
+
+        const studentInnactive = factory.newResource(namespace, studentType, 'studentInnactive');
+        studentInnactive.isAthlete = false;
+        studentInnactive.major = 'CSB';
+        studentInnactive.balance = 100.00;
+        studentInnactive.isActive = false;
+        studentInnactive.accessLevel = 'STUDENT';
+        studentInnactive.lowBalThreshold = 5.00;
+        studentInnactive.txnThreshold = 100.00;
+        studentInnactive.contactInfo = emptyContactInfo;
 
         await administratorRegistry.addAll([administrator1, administrator2]);
         await facultyRegistry.addAll([faculty1, faculty2]);
-        await vendorRegistry.addAll([vendor1, vendor2]);
-        await studentRegistry.addAll([student1, student2]);
+        await vendorRegistry.addAll([vendor1, vendor2, vendorInnactive]);
+        await studentRegistry.addAll([student1, student2, studentInnactive]);
 
     });
 
@@ -375,6 +411,23 @@ describe('#' + namespace, () => {
 
     });
 
+    it('Deleting more than participant balance. The balance for "student1" should go to 0', async () => {
+        // Use the identity for admin.
+        await useIdentity(adminCardName);
+        const student1Before = await studentRegistry.get('student1');
+
+        // Create the transaction.
+        const transactionCreate = factory.newTransaction(namespace, 'DeleteFunds');
+        transactionCreate.amount = student1Before.balance + 100;
+        transactionCreate.fromUser = factory.newRelationship(namespace, studentType, 'student1');
+
+        //Submit transaction and check if balance increased
+        await businessNetworkConnection.submitTransaction(transactionCreate);
+        const student1After = await studentRegistry.get('student1');
+        student1After.balance.should.equal(0);
+
+    });
+
     it('Student-to-student transactions should be rejected', async () => {
         //Admin identity initiates the txn
         await useIdentity(adminCardName);
@@ -385,7 +438,111 @@ describe('#' + namespace, () => {
         transaction.fromUser = factory.newRelationship(namespace, studentType, 'student1');
         transaction.toUser = factory.newRelationship(namespace, studentType, 'student2');
 
-        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Students cannot trade with other Students.');
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Students cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Student-to-Faculty transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+        const student1 = await studentRegistry.get('student1');
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, studentType, 'student1');
+        transaction.toUser = factory.newRelationship(namespace, facultyType, 'faculty1');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Students cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Student-to-Administrator transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+        const student1 = await studentRegistry.get('student1');
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, studentType, 'student1');
+        transaction.toUser = factory.newRelationship(namespace, administratorType, 'administrator1');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Students cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Faculty-to-Student transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+        const faculty1 = await facultyRegistry.get('faculty1');
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, facultyType, 'faculty1');
+        transaction.toUser = factory.newRelationship(namespace, studentType, 'student1');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Faculty cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Faculty-to-Faculty transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+        const faculty1 = await facultyRegistry.get('faculty1');
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, facultyType, 'faculty1');
+        transaction.toUser = factory.newRelationship(namespace, facultyType, 'faculty2');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Faculty cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Faculty-to-Administrator transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+        const faculty1 = await facultyRegistry.get('faculty1');
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, facultyType, 'faculty1');
+        transaction.toUser = factory.newRelationship(namespace, administratorType, 'administrator1');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Faculty cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Admin-to-Student transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+        const administrator1 = await administratorRegistry.get('administrator1');
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, administratorType, 'administrator1');
+        transaction.toUser = factory.newRelationship(namespace, studentType, 'student1');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Administrator cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Admin-to-Faculty transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+        const administrator1 = await administratorRegistry.get('administrator1');
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, administratorType, 'administrator1');
+        transaction.toUser = factory.newRelationship(namespace, facultyType, 'faculty2');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Administrator cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Admin-to-Administrator transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+        const administrator1 = await administratorRegistry.get('administrator1');
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, administratorType, 'administrator1');
+        transaction.toUser = factory.newRelationship(namespace, administratorType, 'administrator2');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Administrator cannot trade with Students, Faculty, or Administrators.');
     });
 
     it('Reject transactions that exceed user balance', async () => {
@@ -449,11 +606,33 @@ describe('#' + namespace, () => {
 
     });
 
+    it('Innactive senders should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+        const student1 = await studentRegistry.get('studentInnactive');
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, studentType, 'studentInnactive');
+        transaction.toUser = factory.newRelationship(namespace, vendorType, 'vendor1');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction failed. The sending account is inactive.');
+    });
+
+    it('Innactive receivers should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+        const student1 = await studentRegistry.get('student1');
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, studentType, 'student1');
+        transaction.toUser = factory.newRelationship(namespace, vendorType, 'vendorInnactive');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction failed. The receiving account is inactive.');
+    });
+
     it('Conduct high txn volume and ensure the total funds in network stays consistent');
 
-    it('Delete funds more than the balance');
-
-    it('Verify permissions. Only admin should be allowed to read/write to blockchain.');
-
-
+    it('Verify permissions. Only admin should be allowed to read/write to blockchain');
 });

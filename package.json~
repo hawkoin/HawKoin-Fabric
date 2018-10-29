@@ -3,7 +3,7 @@
     "composer": "^0.19.15"
   },
   "name": "hawkoin-network",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "na",
   "scripts": {
     "prepublish": "mkdirp ./dist && composer archive create --sourceType dir --sourceName . -a ./dist/hawkoin-network.bna",
