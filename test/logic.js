@@ -446,7 +446,6 @@ describe('#' + namespace, () => {
         vendor1After.balance.should.equal(vendor1Before.balance+(3*amtToSend));
 
 
-
     });
 
     it('Conduct high txn volume and ensure the total funds in network stays consistent');

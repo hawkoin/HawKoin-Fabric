@@ -3,7 +3,7 @@
     "composer": "^0.19.15"
   },
   "name": "hawkoin-network",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "na",
   "scripts": {
     "prepublish": "mkdirp ./dist && composer archive create --sourceType dir --sourceName . -a ./dist/hawkoin-network.bna",
@@ -32,5 +32,9 @@
     "nyc": "latest",
     "mkdirp": "latest",
     "mocha": "latest"
+  },
+  "dependencies": {
+    "loopback-connector-mongodb": "^3.8.0",
+    "passport-google-oauth2": "^0.1.6"
   }
 }
