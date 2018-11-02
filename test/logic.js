@@ -72,8 +72,10 @@ describe('#' + namespace, () => {
     const faculty2CardName = 'faculty2';
     const vendor1CardName = 'vendor1';
     const vendor2CardName = 'vendor2';
+    const vendorInnactiveCardName = 'vendorInnactive';
     const student1CardName = 'student1';
     const student2CardName = 'student2';
+    const studentInnactiveCardName = 'studentInnactive';
 
     var administratorRegistry;
     var facultyRegistry;
@@ -635,4 +637,10 @@ describe('#' + namespace, () => {
     it('Conduct high txn volume and ensure the total funds in network stays consistent');
 
     it('Verify permissions. Only admin should be allowed to read/write to blockchain');
+
+    it('Return participant\'s remaining balance. Should be stored in an event');
+
+    it('Breaking Minimum Balance Threshold creates \'Low Balance Alert\' event.');
+
+    it('Breaking Maximum Transaction Threshold creates \'Transaction Threshold Breach\' event.');
 });

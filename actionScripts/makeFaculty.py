@@ -41,7 +41,9 @@ def main(argv):
             '$class': 'org.hawkoin.network.Faculty',  
             'id': id,        
             'balance': balance,
-            'isActive': True, 
+            'isActive': True,
+            'lowBalThreshold': 5,
+            'txnThreshold': 75, 
             'accessLevel': 'FACULTY',
             'dept': dept,                
             'contactInfo': {                           
@@ -61,11 +63,11 @@ def main(argv):
 
         status = response.status_code
        
-        if(status == 500):
+        if(status != 200):
             json_string = response.text
             parsed_json = json.loads(json_string)
             print(parsed_json['error']['message'])
-        else:
+        elif (status == 200):
             print('Successfully added Faculty', id)
 
     except requests.exceptions.Timeout:

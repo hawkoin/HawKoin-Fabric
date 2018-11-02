@@ -38,7 +38,9 @@ def main(argv):
             '$class': 'org.hawkoin.network.Administrator',
             'id': id,        
             'balance': balance,
-            'isActive': True, 
+            'isActive': True,
+            'lowBalThreshold': 5,
+            'txnThreshold': 75,
             'accessLevel': 'ADMIN',                 
             'contactInfo': {                           
               '$class': 'org.hawkoin.network.ContactInfo',      
@@ -57,11 +59,11 @@ def main(argv):
 
         status = response.status_code
        
-        if(status == 500):
+        if(status != 200):
             json_string = response.text
             parsed_json = json.loads(json_string)
             print(parsed_json['error']['message'])
-        else:
+        elif (status == 200):
             print('Successfully added Admin', id)
 
     except requests.exceptions.Timeout:

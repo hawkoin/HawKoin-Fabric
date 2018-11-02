@@ -42,6 +42,8 @@ def main(argv):
         "id": id,
         "balance": balance,
         "isActive": True,
+        'lowBalThreshold': 5,
+        'txnThreshold': 75,
         "accessLevel": "VENDOR",
         "contactInfo": {
           "$class": "org.hawkoin.network.ContactInfo",
@@ -60,12 +62,12 @@ def main(argv):
 
         status = response.status_code
 
-        if(status == 500):
+        if(status != 200):
             json_string = response.text
             parsed_json = json.loads(json_string)
             print(parsed_json['error']['message'])
-        else:
-            print('Successfully added', name)
+        elif (status == 200):
+            print('Successfully added', name, id)
 
     except requests.exceptions.Timeout:
         # Maybe set up for a retry, or continue in a retry loop

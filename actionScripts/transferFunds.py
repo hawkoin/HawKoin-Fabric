@@ -56,7 +56,7 @@ def main(argv):
             parsed_json = json.loads(json_string)
             print(parsed_json['error']['message'])
         else:
-            print('Successful transfer from ', fromID, 'to', toID)
+            print('Successful transfer from', fromType, fromID, 'to', toType, toID)
 
     except requests.exceptions.Timeout:
         # Maybe set up for a retry, or continue in a retry loop
