@@ -1,0 +1,10 @@
+/**
+ * New query file
+ */
+
+query velocityCheck {
+	description: "Select all transactions within the last 5 minutes for a given User"
+  	statement:
+  		SELECT org.hawkoin.network.TransferFunds
+  			WHERE ((timestamp >= _$stamp) AND (fromUser == _$user))
+}

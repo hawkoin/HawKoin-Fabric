@@ -28,6 +28,17 @@ concept ContactInfo {
   o String zip
 }
 
+transaction ChangeContactInfo {
+  o String newFirst
+  o String newLast
+  o String newEmail
+  o String newAdd
+  o String newCity
+  o String newState
+  o String newZip
+  --> User user
+}
+
 enum CashConversion {
  	o WEEKLY
   o BIWEEKLY
@@ -79,8 +90,22 @@ event TransactionThreshBreach {
  	o ContactInfo info 
 }
 
+event VelocityWarning {
+ 	o ContactInfo info
+}
+
+transaction ChangeTxnBreach {
+ 	o Double thresh
+    --> User user
+}
+
 event LowBalanceAlert {
  	o ContactInfo info 
+}
+
+transaction ChangeLowBalAlert {
+ 	o Double thresh
+    --> User user
 }
 
 transaction TransferFunds {
