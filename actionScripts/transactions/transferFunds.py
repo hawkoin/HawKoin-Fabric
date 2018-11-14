@@ -5,25 +5,28 @@ import sys, getopt
 
 def main(argv):
     amount = 0
+    authToken = " "
     fromType = ''
     fromID = -1
     toType = ''
     toID = -1
     try:
-        opts, args = getopt.getopt(argv,"ha:f:F:t:T:", ["amount=", "fromType=", "fromID=", "toType=", "toID="])
+        opts, args = getopt.getopt(argv,"ha:A:f:F:t:T:", ["amount=", "authToken=", "fromType=", "fromID=", "toType=", "toID="])
     except getopt.GetoptError as e:
-        print ('transferFunds.py -a <amount> -f <fromType> -F <fromID> -t <toType> -T <toID>')
+        print ('transferFunds.py -a <amount> -A <authToken> -f <fromType> -F <fromID> -t <toType> -T <toID> ')
         print(e)
         sys.exit(2)
     if len(sys.argv) == 1:
-        print ('transferFunds.py -a <amount> -f <fromType> -F <fromID> -t <toType> -T <toID>')
+        print ('transferFunds.py -a <amount> -A <authToken> -f <fromType> -F <fromID> -t <toType> -T <toID> ')
         sys.exit()
     for opt, arg in opts:
         if opt == '-h':
-            print ('transferFunds.py -a <amount> -f <fromType> -F <fromID> -t <toType> -T <toID>')
+            print ('transferFunds.py -a <amount> -A <authToken> -f <fromType> -F <fromID> -t <toType> -T <toID> ')
             sys.exit()
         elif opt in ("-a", "--amount"):
             amount = arg
+        elif opt in ("-A", "--authToken"):
+            authToken = arg
         elif opt in ("-f", "--fromType"):
             fromType = arg
         elif opt in ("-F", "--fromID"):
@@ -42,6 +45,7 @@ def main(argv):
     json_payload = {
         '$class': 'org.hawkoin.network.TransferFunds',
         'amount': amount,
+        'authToken': authToken,
         'fromUser': fromUser,
         'toUser': toUser
     }
