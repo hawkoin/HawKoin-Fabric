@@ -33,15 +33,15 @@ do
     admin_id=$(( (31 + RANDOM % 10) ))
 
     echo Transfering Funds from Student $student_id to Vendor $vendor_id
-    python3 transactions/transferFunds.py -a 10 -f Student -F $student_id -t Vendor -T $vendor_id
+    python3 transactions/transferFunds.py -a 10 -A noToken -f Student -F $student_id -t Vendor -T $vendor_id
 
     vendor_id=$(( (11 + RANDOM % 10) ))
     echo Transfering Funds from Faculty $faculty_id to Vendor $vendor_id
-    python3 transactions/transferFunds.py -a 10 -f Faculty -F $faculty_id -t Vendor -T $vendor_id
+    python3 transactions/transferFunds.py -a 10 -A noToken -f Faculty -F $faculty_id -t Vendor -T $vendor_id
 
     vendor_id=$(( (11 + RANDOM % 10) ))
     echo Transfering Funds from Admin $admin_id to Vendor $vendor_id
-    python3 transactions/transferFunds.py -a 10 -f Administrator -F $admin_id -t Vendor -T $vendor_id
+    python3 transactions/transferFunds.py -a 10 -A noToken -f Administrator -F $admin_id -t Vendor -T $vendor_id
 
     ((loop++))
 done
