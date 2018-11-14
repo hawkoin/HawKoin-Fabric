@@ -28,7 +28,7 @@ def main(argv):
 
         d = response.json()
         #formatted_json = json.dumps(json_string, sort_keys=True, indent=4, separators=(',',': '))
-        f = csv.writer(open('../reports/transactionReport.csv', 'w'))
+        f = csv.writer(open('../../Reports/transactionReport.csv', 'w'))
         cj = {}
         count = 0
         for item in d:

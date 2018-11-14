@@ -16,7 +16,7 @@ def main(argv):
         #d = json.loads(json_string)
        # formatted_json = json.dumps(json_string, sort_keys=True, indent=4, separators=(',',': '))
 #        f = csv.writer(open('dataReport.xlsx', 'wb+'))
-        f = csv.writer(open('../reports/facultyReport.csv', 'w'))
+        f = csv.writer(open('../../Reports/facultyReport.csv', 'w'))
         cj = {}
         count = 0
         for item in d:
