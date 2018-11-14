@@ -1,0 +1,17 @@
+/**
+ * New query file
+ */
+
+query velocityCheck {
+	description: "Select all transactions within the last 5 minutes for a given User"
+  	statement:
+  		SELECT org.hawkoin.network.TransferFunds
+  			WHERE ((timestamp >= _$stamp) AND (fromUser == _$user))
+}
+
+query getDailyEvents {
+	description: "Select all events within the last 24 hours"
+  	statement:
+  		SELECT org.hyperledger.composer.system.HistorianRecord
+  			WHERE ((transactionTimestamp >= _$stamp))
+}

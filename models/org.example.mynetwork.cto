@@ -28,26 +28,41 @@ concept ContactInfo {
   o String zip
 }
 
+transaction ChangeContactInfo {
+  o String newFirst
+  o String newLast
+  o String newEmail
+  o String newAdd
+  o String newCity
+  o String newState
+  o String newZip
+  --> User user
+}
+
 enum CashConversion {
  	o WEEKLY
-    o BIWEEKLY
-    o MONTHLY
-    o BIMONTHLY
+  o BIWEEKLY
+  o MONTHLY
+  o BIMONTHLY
 }
 
 enum Access {
  	o TOTAL
-    o ADMIN
-    o BURSAR
-    o STUDENT
-    o FACULTY
-    o VENDOR
+  o ADMIN
+  o BURSAR
+  o STUDENT
+  o FACULTY
+  o VENDOR
 }
+
+
 
 abstract participant User identified by id {
   o String id
   o Double balance
   o Boolean isActive
+  o Double lowBalThreshold
+  o Double txnThreshold
   o Access accessLevel
   o ContactInfo contactInfo
 }
@@ -69,8 +84,35 @@ participant Student extends User {
   o String major
 }
 
+event RemainingBalance {
+ 	o Double remainingBal 
+}
+
+event TransactionThreshBreach {
+ 	o ContactInfo info 
+}
+
+event VelocityWarning {
+ 	o ContactInfo info
+}
+
+transaction ChangeTxnBreach {
+ 	o Double thresh
+    --> User user
+}
+
+event LowBalanceAlert {
+ 	o ContactInfo info 
+}
+
+transaction ChangeLowBalAlert {
+ 	o Double thresh
+    --> User user
+}
+
 transaction TransferFunds {
     o Double amount
+    o String authToken
     --> User fromUser
     --> User toUser
 }
@@ -83,4 +125,8 @@ transaction CreateFunds {
 transaction DeleteFunds {
  	o Double amount
     --> User fromUser
+}
+
+asset DemoMode identified by id {
+  o String id
 }

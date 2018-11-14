@@ -12,6 +12,84 @@
  * limitations under the License.
  */
 
+//------------------------------- Participant Viewing Access ---------------------------------
+rule SystemVisibility {
+    description: "Participants may only read the blockcain data and chaincode"
+    participant: "org.hyperledger.composer.system.Participant"
+    operation: READ
+    resource: "org.hyperledger.composer.system.*"
+    action: ALLOW
+}
+
+rule ParticipantVisibility {
+    description: "Participants may only read the blockcain data and chaincode"
+    participant: "org.hyperledger.composer.system.Participant"
+    operation: READ
+    resource: "org.hawkoin.network.*"
+    action: ALLOW
+}
+//---------------------------------------------------------------------------------------
+
+//------------------------------- Administrator Access ---------------------------------
+rule AdminTransactions {
+    description: "Administrators cannot update their own information"
+    participant: "org.hawkoin.network.Administrator"
+    operation: ALL
+    resource: "org.hyperledger.composer.system.Transaction"
+    action: ALLOW
+}
+
+rule AdminCheatsSelf {
+    description: "Administrators cannot update their own information"
+    participant: "org.hawkoin.network.Administrator"
+    operation: UPDATE, DELETE
+    resource: "org.hawkoin.network.Administrator"
+    action: DENY
+}
+
+rule AdminCheatsStudent {
+    description: "Administrators cannot update student information"
+    participant: "org.hawkoin.network.Administrator"
+    operation: UPDATE, DELETE
+    resource: "org.hawkoin.network.Student"
+    action: DENY
+}
+
+
+rule AdminCheatsVendor {
+    description: "Administrators cannot update vendor information"
+    participant: "org.hawkoin.network.Administrator"
+    operation: UPDATE, DELETE
+    resource: "org.hawkoin.network.Vendor"
+    action: DENY
+}
+
+rule AdminCheatsFaculty {
+    description: "Administrators cannot update faculty information"
+    participant: "org.hawkoin.network.Administrator"
+    operation: UPDATE, DELETE
+    resource: "org.hawkoin.network.Faculty"
+    action: DENY
+}
+
+rule AdminSystemAccess {
+    description: "Administrators have full access to the system"
+    participant: "org.hawkoin.network.Administrator"
+    operation: ALL
+    resource: "org.hyperledger.composer.system.**"
+    action: ALLOW
+}
+
+rule AdminUserAccess {
+    description: "Administrators have full access to the system"
+    participant: "org.hawkoin.network.Administrator"
+    operation: ALL
+    resource: "**"
+    action: ALLOW
+}
+//---------------------------------------------------------------------------------------
+
+//------------------------------- Network Admin Access ---------------------------------
 rule NetworkAdminUser {
     description: "Grant business network administrators full access to user resources"
     participant: "org.hyperledger.composer.system.NetworkAdmin"
@@ -27,5 +105,4 @@ rule NetworkAdminSystem {
     resource: "org.hyperledger.composer.system.**"
     action: ALLOW
 }
-
-
+//---------------------------------------------------------------------------------------

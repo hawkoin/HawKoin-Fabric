@@ -72,8 +72,10 @@ describe('#' + namespace, () => {
     const faculty2CardName = 'faculty2';
     const vendor1CardName = 'vendor1';
     const vendor2CardName = 'vendor2';
+    const vendorInnactiveCardName = 'vendorInnactive';
     const student1CardName = 'student1';
     const student2CardName = 'student2';
+    const studentInnactiveCardName = 'studentInnactive';
 
     var administratorRegistry;
     var facultyRegistry;
@@ -168,12 +170,16 @@ describe('#' + namespace, () => {
         administrator1.balance = 100.00;
         administrator1.isActive = true;
         administrator1.accessLevel = 'ADMIN';
+        administrator1.lowBalThreshold = 5.00;
+        administrator1.txnThreshold = 100.00;
         administrator1.contactInfo = emptyContactInfo;
 
         const administrator2 = factory.newResource(namespace,administratorType, 'administrator2');
         administrator2.balance = 100.00;
         administrator2.isActive = true;
         administrator2.accessLevel = 'ADMIN';
+        administrator2.lowBalThreshold = 5.00;
+        administrator2.txnThreshold = 100.00;
         administrator2.contactInfo = emptyContactInfo;
 
         const faculty1 = factory.newResource(namespace,facultyType, 'faculty1');
@@ -181,6 +187,8 @@ describe('#' + namespace, () => {
         faculty1.balance = 100.00;
         faculty1.isActive = true;
         faculty1.accessLevel = 'FACULTY';
+        faculty1.lowBalThreshold = 5.00;
+        faculty1.txnThreshold = 100.00;
         faculty1.contactInfo = emptyContactInfo;
 
         const faculty2 = factory.newResource(namespace,facultyType, 'faculty2');
@@ -188,6 +196,8 @@ describe('#' + namespace, () => {
         faculty2.balance = 100.00;
         faculty2.isActive = true;
         faculty2.accessLevel = 'FACULTY';
+        faculty2.lowBalThreshold = 5.00;
+        faculty2.txnThreshold = 100.00;
         faculty2.contactInfo = emptyContactInfo;
 
         const vendor1 = factory.newResource(namespace, vendorType, 'vendor1');
@@ -196,6 +206,8 @@ describe('#' + namespace, () => {
         vendor1.balance = 100.00;
         vendor1.isActive = true;
         vendor1.accessLevel = 'VENDOR';
+        vendor1.lowBalThreshold = 5.00;
+        vendor1.txnThreshold = 100.00;
         vendor1.contactInfo = emptyContactInfo;
 
         const vendor2 = factory.newResource(namespace, vendorType, 'vendor2');
@@ -204,7 +216,19 @@ describe('#' + namespace, () => {
         vendor2.balance = 100.00;
         vendor2.isActive = true;
         vendor2.accessLevel = 'VENDOR';
+        vendor2.lowBalThreshold = 5.00;
+        vendor2.txnThreshold = 100.00;
         vendor2.contactInfo = emptyContactInfo;
+
+        const vendorInnactive = factory.newResource(namespace, vendorType, 'vendorInnactive');
+        vendorInnactive.vendorName = 'InnactiveVendor';
+        vendorInnactive.ccr = 'MONTHLY';
+        vendorInnactive.balance = 100.00;
+        vendorInnactive.isActive = false;
+        vendorInnactive.accessLevel = 'VENDOR';
+        vendorInnactive.lowBalThreshold = 5.00;
+        vendorInnactive.txnThreshold = 100.00;
+        vendorInnactive.contactInfo = emptyContactInfo;
 
         const student1 = factory.newResource(namespace, studentType, 'student1');
         student1.isAthlete = false;
@@ -212,6 +236,8 @@ describe('#' + namespace, () => {
         student1.balance = 100.00;
         student1.isActive = true;
         student1.accessLevel = 'STUDENT';
+        student1.lowBalThreshold = 5.00;
+        student1.txnThreshold = 100.00;
         student1.contactInfo = emptyContactInfo;
 
         const student2 = factory.newResource(namespace, studentType, 'student2');
@@ -220,12 +246,24 @@ describe('#' + namespace, () => {
         student2.balance = 100.00;
         student2.isActive = true;
         student2.accessLevel = 'STUDENT';
+        student2.lowBalThreshold = 5.00;
+        student2.txnThreshold = 100.00;
         student2.contactInfo = emptyContactInfo;
+
+        const studentInnactive = factory.newResource(namespace, studentType, 'studentInnactive');
+        studentInnactive.isAthlete = false;
+        studentInnactive.major = 'CSB';
+        studentInnactive.balance = 100.00;
+        studentInnactive.isActive = false;
+        studentInnactive.accessLevel = 'STUDENT';
+        studentInnactive.lowBalThreshold = 5.00;
+        studentInnactive.txnThreshold = 100.00;
+        studentInnactive.contactInfo = emptyContactInfo;
 
         await administratorRegistry.addAll([administrator1, administrator2]);
         await facultyRegistry.addAll([faculty1, faculty2]);
-        await vendorRegistry.addAll([vendor1, vendor2]);
-        await studentRegistry.addAll([student1, student2]);
+        await vendorRegistry.addAll([vendor1, vendor2, vendorInnactive]);
+        await studentRegistry.addAll([student1, student2, studentInnactive]);
 
     });
 
@@ -375,17 +413,129 @@ describe('#' + namespace, () => {
 
     });
 
+    it('Deleting more than participant balance. The balance for "student1" should go to 0', async () => {
+        // Use the identity for admin.
+        await useIdentity(adminCardName);
+        const student1Before = await studentRegistry.get('student1');
+
+        // Create the transaction.
+        const transactionCreate = factory.newTransaction(namespace, 'DeleteFunds');
+        transactionCreate.amount = student1Before.balance + 100;
+        transactionCreate.fromUser = factory.newRelationship(namespace, studentType, 'student1');
+
+        //Submit transaction and check if balance increased
+        await businessNetworkConnection.submitTransaction(transactionCreate);
+        const student1After = await studentRegistry.get('student1');
+        student1After.balance.should.equal(0);
+
+    });
+
     it('Student-to-student transactions should be rejected', async () => {
         //Admin identity initiates the txn
         await useIdentity(adminCardName);
-        const student1 = await studentRegistry.get('student1');
 
         const transaction = factory.newTransaction(namespace, 'TransferFunds');
         transaction.amount = 50;
         transaction.fromUser = factory.newRelationship(namespace, studentType, 'student1');
         transaction.toUser = factory.newRelationship(namespace, studentType, 'student2');
 
-        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Students cannot trade with other Students.');
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Students cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Student-to-Faculty transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, studentType, 'student1');
+        transaction.toUser = factory.newRelationship(namespace, facultyType, 'faculty1');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Students cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Student-to-Administrator transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, studentType, 'student1');
+        transaction.toUser = factory.newRelationship(namespace, administratorType, 'administrator1');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Students cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Faculty-to-Student transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, facultyType, 'faculty1');
+        transaction.toUser = factory.newRelationship(namespace, studentType, 'student1');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Faculty cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Faculty-to-Faculty transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, facultyType, 'faculty1');
+        transaction.toUser = factory.newRelationship(namespace, facultyType, 'faculty2');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Faculty cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Faculty-to-Administrator transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, facultyType, 'faculty1');
+        transaction.toUser = factory.newRelationship(namespace, administratorType, 'administrator1');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Faculty cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Admin-to-Student transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, administratorType, 'administrator1');
+        transaction.toUser = factory.newRelationship(namespace, studentType, 'student1');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Administrator cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Admin-to-Faculty transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, administratorType, 'administrator1');
+        transaction.toUser = factory.newRelationship(namespace, facultyType, 'faculty2');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Administrator cannot trade with Students, Faculty, or Administrators.');
+    });
+
+    it('Admin-to-Administrator transactions should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, administratorType, 'administrator1');
+        transaction.toUser = factory.newRelationship(namespace, administratorType, 'administrator2');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Administrator cannot trade with Students, Faculty, or Administrators.');
     });
 
     it('Reject transactions that exceed user balance', async () => {
@@ -444,16 +594,289 @@ describe('#' + namespace, () => {
 
         const vendor1After = await vendorRegistry.get('vendor1');
         vendor1After.balance.should.equal(vendor1Before.balance+(3*amtToSend));
+    });
 
+    it('Innactive senders should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
 
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, studentType, 'studentInnactive');
+        transaction.toUser = factory.newRelationship(namespace, vendorType, 'vendor1');
 
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction failed. The sending account is inactive.');
+    });
+
+    it('Innactive receivers should be rejected', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const transaction = factory.newTransaction(namespace, 'TransferFunds');
+        transaction.amount = 50;
+        transaction.fromUser = factory.newRelationship(namespace, studentType, 'student1');
+        transaction.toUser = factory.newRelationship(namespace, vendorType, 'vendorInnactive');
+
+        businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction failed. The receiving account is inactive.');
+    });
+
+    it('Users can update their Low Balance Alert Threshold', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const transaction = factory.newTransaction(namespace, 'ChangeLowBalAlert');
+        transaction.thresh = 2.50;
+        transaction.user = factory.newRelationship(namespace, studentType, 'student1');
+
+        await businessNetworkConnection.submitTransaction(transaction);
+
+        const student1After = await studentRegistry.get('student1');
+        student1After.lowBalThreshold.should.equal(transaction.thresh);
+    });
+
+    it('Users can update their Transaction Limit Breach Threshold', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const transaction = factory.newTransaction(namespace, 'ChangeTxnBreach');
+        transaction.thresh = 100;
+        transaction.user = factory.newRelationship(namespace, studentType, 'student1');
+
+        await businessNetworkConnection.submitTransaction(transaction);
+
+        const student1After = await studentRegistry.get('student1');
+        student1After.txnThreshold.should.equal(transaction.thresh);
+    });
+
+    it('Users can update their Contact Info', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const transaction = factory.newTransaction(namespace, 'ChangeContactInfo');
+        transaction.newFirst = 'TestFirstName';
+        transaction.newLast = 'TestLastName';
+        transaction.newEmail = 'test219@lehigh.edu';
+        transaction.newAdd = '201 University Drive';
+        transaction.newCity = 'Bethlehem';
+        transaction.newState = 'PA';
+        transaction.newZip = '18015';
+        transaction.user = factory.newRelationship(namespace, studentType, 'student1');
+
+        await businessNetworkConnection.submitTransaction(transaction);
+
+        const student1After = await studentRegistry.get('student1');
+        student1After.contactInfo.firstName.should.equal(transaction.newFirst);
+        student1After.contactInfo.lastName.should.equal(transaction.newLast);
+        student1After.contactInfo.email.should.equal(transaction.newEmail);
+        student1After.contactInfo.address.should.equal(transaction.newAdd);
+        student1After.contactInfo.city.should.equal(transaction.newCity);
+        student1After.contactInfo.state.should.equal(transaction.newState);
+        student1After.contactInfo.zip.should.equal(transaction.newZip);
+    });
+
+    it('Users can update their first name independently', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const student1Before = await studentRegistry.get('student1');
+
+        const transaction = factory.newTransaction(namespace, 'ChangeContactInfo');
+        transaction.newFirst = 'firstnametest';
+        transaction.newLast = 'null';
+        transaction.newEmail = 'null';
+        transaction.newAdd = 'null';
+        transaction.newCity = 'null';
+        transaction.newState = 'null';
+        transaction.newZip = 'null';
+        transaction.user = factory.newRelationship(namespace, studentType, 'student1');
+
+        await businessNetworkConnection.submitTransaction(transaction);
+
+        const student1After = await studentRegistry.get('student1');
+        student1After.contactInfo.firstName.should.equal(transaction.newFirst);
+        student1After.contactInfo.lastName.should.equal(student1Before.contactInfo.lastName);
+        student1After.contactInfo.email.should.equal(student1Before.contactInfo.email);
+        student1After.contactInfo.address.should.equal(student1Before.contactInfo.address);
+        student1After.contactInfo.city.should.equal(student1Before.contactInfo.city);
+        student1After.contactInfo.state.should.equal(student1Before.contactInfo.state);
+        student1After.contactInfo.zip.should.equal(student1Before.contactInfo.zip);
+    });
+
+    it('Users can update their last name independently', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const student1Before = await studentRegistry.get('student1');
+
+        const transaction = factory.newTransaction(namespace, 'ChangeContactInfo');
+        transaction.newFirst = 'null';
+        transaction.newLast = 'lastnametest';
+        transaction.newEmail = 'null';
+        transaction.newAdd = 'null';
+        transaction.newCity = 'null';
+        transaction.newState = 'null';
+        transaction.newZip = 'null';
+        transaction.user = factory.newRelationship(namespace, studentType, 'student1');
+
+        await businessNetworkConnection.submitTransaction(transaction);
+
+        const student1After = await studentRegistry.get('student1');
+        student1After.contactInfo.firstName.should.equal(student1Before.contactInfo.firstName);
+        student1After.contactInfo.lastName.should.equal(transaction.newLast);
+        student1After.contactInfo.email.should.equal(student1Before.contactInfo.email);
+        student1After.contactInfo.address.should.equal(student1Before.contactInfo.address);
+        student1After.contactInfo.city.should.equal(student1Before.contactInfo.city);
+        student1After.contactInfo.state.should.equal(student1Before.contactInfo.state);
+        student1After.contactInfo.zip.should.equal(student1Before.contactInfo.zip);
+    });
+
+    it('Admin can update email independently', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const student1Before = await studentRegistry.get('student1');
+
+        const transaction = factory.newTransaction(namespace, 'ChangeContactInfo');
+        transaction.newFirst = 'null';
+        transaction.newLast = 'null';
+        transaction.newEmail = 'emailtest';
+        transaction.newAdd = 'null';
+        transaction.newCity = 'null';
+        transaction.newState = 'null';
+        transaction.newZip = 'null';
+        transaction.user = factory.newRelationship(namespace, studentType, 'student1');
+
+        await businessNetworkConnection.submitTransaction(transaction);
+
+        const student1After = await studentRegistry.get('student1');
+        student1After.contactInfo.firstName.should.equal(student1Before.contactInfo.firstName);
+        student1After.contactInfo.lastName.should.equal(student1Before.contactInfo.lastName);
+        student1After.contactInfo.email.should.equal(transaction.newEmail);
+        student1After.contactInfo.address.should.equal(student1Before.contactInfo.address);
+        student1After.contactInfo.city.should.equal(student1Before.contactInfo.city);
+        student1After.contactInfo.state.should.equal(student1Before.contactInfo.state);
+        student1After.contactInfo.zip.should.equal(student1Before.contactInfo.zip);
+    });
+
+    it('Users can update their address independently', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const student1Before = await studentRegistry.get('student1');
+
+        const transaction = factory.newTransaction(namespace, 'ChangeContactInfo');
+        transaction.newFirst = 'null';
+        transaction.newLast = 'null';
+        transaction.newEmail = 'null';
+        transaction.newAdd = '100 Testing Drive';
+        transaction.newCity = 'null';
+        transaction.newState = 'null';
+        transaction.newZip = 'null';
+        transaction.user = factory.newRelationship(namespace, studentType, 'student1');
+
+        await businessNetworkConnection.submitTransaction(transaction);
+
+        const student1After = await studentRegistry.get('student1');
+        student1After.contactInfo.firstName.should.equal(student1Before.contactInfo.firstName);
+        student1After.contactInfo.lastName.should.equal(student1Before.contactInfo.lastName);
+        student1After.contactInfo.email.should.equal(student1Before.contactInfo.email);
+        student1After.contactInfo.address.should.equal(transaction.newAdd);
+        student1After.contactInfo.city.should.equal(student1Before.contactInfo.city);
+        student1After.contactInfo.state.should.equal(student1Before.contactInfo.state);
+        student1After.contactInfo.zip.should.equal(student1Before.contactInfo.zip);
+    });
+
+    it('Users can update their city independently', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const student1Before = await studentRegistry.get('student1');
+
+        const transaction = factory.newTransaction(namespace, 'ChangeContactInfo');
+        transaction.newFirst = 'null';
+        transaction.newLast = 'null';
+        transaction.newEmail = 'null';
+        transaction.newAdd = 'null';
+        transaction.newCity = 'citytest';
+        transaction.newState = 'null';
+        transaction.newZip = 'null';
+        transaction.user = factory.newRelationship(namespace, studentType, 'student1');
+
+        await businessNetworkConnection.submitTransaction(transaction);
+
+        const student1After = await studentRegistry.get('student1');
+        student1After.contactInfo.firstName.should.equal(student1Before.contactInfo.firstName);
+        student1After.contactInfo.lastName.should.equal(student1Before.contactInfo.lastName);
+        student1After.contactInfo.email.should.equal(student1Before.contactInfo.email);
+        student1After.contactInfo.address.should.equal(student1Before.contactInfo.address);
+        student1After.contactInfo.city.should.equal(transaction.newCity);
+        student1After.contactInfo.state.should.equal(student1Before.contactInfo.state);
+        student1After.contactInfo.zip.should.equal(student1Before.contactInfo.zip);
+    });
+
+    it('Users can update their state independently', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const student1Before = await studentRegistry.get('student1');
+
+        const transaction = factory.newTransaction(namespace, 'ChangeContactInfo');
+        transaction.newFirst = 'null';
+        transaction.newLast = 'null';
+        transaction.newEmail = 'null';
+        transaction.newAdd = 'null';
+        transaction.newCity = 'null';
+        transaction.newState = 'statetest';
+        transaction.newZip = 'null';
+        transaction.user = factory.newRelationship(namespace, studentType, 'student1');
+
+        await businessNetworkConnection.submitTransaction(transaction);
+
+        const student1After = await studentRegistry.get('student1');
+        student1After.contactInfo.firstName.should.equal(student1Before.contactInfo.firstName);
+        student1After.contactInfo.lastName.should.equal(student1Before.contactInfo.lastName);
+        student1After.contactInfo.email.should.equal(student1Before.contactInfo.email);
+        student1After.contactInfo.address.should.equal(student1Before.contactInfo.address);
+        student1After.contactInfo.city.should.equal(student1Before.contactInfo.city);
+        student1After.contactInfo.state.should.equal(transaction.newState);
+        student1After.contactInfo.zip.should.equal(student1Before.contactInfo.zip);
+    });
+
+    it('Users can update their zip independently', async () => {
+        //Admin identity initiates the txn
+        await useIdentity(adminCardName);
+
+        const student1Before = await studentRegistry.get('student1');
+
+        const transaction = factory.newTransaction(namespace, 'ChangeContactInfo');
+        transaction.newFirst = 'null';
+        transaction.newLast = 'null';
+        transaction.newEmail = 'null';
+        transaction.newAdd = 'null';
+        transaction.newCity = 'null';
+        transaction.newState = 'null';
+        transaction.newZip = 'ziptest';
+        transaction.user = factory.newRelationship(namespace, studentType, 'student1');
+
+        await businessNetworkConnection.submitTransaction(transaction);
+
+        const student1After = await studentRegistry.get('student1');
+        student1After.contactInfo.firstName.should.equal(student1Before.contactInfo.firstName);
+        student1After.contactInfo.lastName.should.equal(student1Before.contactInfo.lastName);
+        student1After.contactInfo.email.should.equal(student1Before.contactInfo.email);
+        student1After.contactInfo.address.should.equal(student1Before.contactInfo.address);
+        student1After.contactInfo.city.should.equal(student1Before.contactInfo.city);
+        student1After.contactInfo.state.should.equal(student1Before.contactInfo.state);
+        student1After.contactInfo.zip.should.equal(transaction.newZip);
     });
 
     it('Conduct high txn volume and ensure the total funds in network stays consistent');
 
-    it('Delete funds more than the balance');
+    it('Verify permissions. Only admin should be allowed to read/write to blockchain');
 
-    it('Verify permissions. Only admin should be allowed to read/write to blockchain.');
+    it('Return participant\'s remaining balance. Should be stored in an event');
 
+    it('Breaking Minimum Balance Threshold creates \'Low Balance Alert\' event.');
 
+    it('Breaking Maximum Transaction Threshold creates \'Transaction Threshold Breach\' event.');
 });
