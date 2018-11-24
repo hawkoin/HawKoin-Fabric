@@ -79,6 +79,7 @@ def main(argv):
                                 txnThreshEmailBody
                         ])
                         if event['info']['email']:
+
                             server.sendmail("hawkoin.alerts@gmail.com", event['info']['email'], msg)
                             note = 'Sent Transaction Limit Breach Notification to ' + event['info']['email']
                             print(note)
