@@ -452,7 +452,7 @@ describe('#' + namespace, () => {
 
         businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Students cannot trade with Students, Faculty, or Administrators.');
     });
-/*
+
     it('Student-to-Faculty transactions should be rejected', async () => {
         //Admin identity initiates the txn
         await useIdentity(adminCardName);
@@ -461,7 +461,7 @@ describe('#' + namespace, () => {
         transaction.amount = 50;
         transaction.fromUser = factory.newRelationship(namespace, studentType, 'student1');
         transaction.toUser = factory.newRelationship(namespace, facultyType, 'faculty1');
-
+        transaction.authToken = ' ';
         businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Students cannot trade with Students, Faculty, or Administrators.');
     });
 
@@ -473,6 +473,7 @@ describe('#' + namespace, () => {
         transaction.amount = 50;
         transaction.fromUser = factory.newRelationship(namespace, studentType, 'student1');
         transaction.toUser = factory.newRelationship(namespace, administratorType, 'administrator1');
+        transaction.authToken = ' ';
 
         businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Students cannot trade with Students, Faculty, or Administrators.');
     });
@@ -485,6 +486,7 @@ describe('#' + namespace, () => {
         transaction.amount = 50;
         transaction.fromUser = factory.newRelationship(namespace, facultyType, 'faculty1');
         transaction.toUser = factory.newRelationship(namespace, studentType, 'student1');
+        transaction.authToken = ' ';
 
         businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Faculty cannot trade with Students, Faculty, or Administrators.');
     });
@@ -497,6 +499,7 @@ describe('#' + namespace, () => {
         transaction.amount = 50;
         transaction.fromUser = factory.newRelationship(namespace, facultyType, 'faculty1');
         transaction.toUser = factory.newRelationship(namespace, facultyType, 'faculty2');
+        transaction.authToken = ' ';
 
         businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Faculty cannot trade with Students, Faculty, or Administrators.');
     });
@@ -509,6 +512,7 @@ describe('#' + namespace, () => {
         transaction.amount = 50;
         transaction.fromUser = factory.newRelationship(namespace, facultyType, 'faculty1');
         transaction.toUser = factory.newRelationship(namespace, administratorType, 'administrator1');
+        transaction.authToken = ' ';
 
         businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Faculty cannot trade with Students, Faculty, or Administrators.');
     });
@@ -521,6 +525,7 @@ describe('#' + namespace, () => {
         transaction.amount = 50;
         transaction.fromUser = factory.newRelationship(namespace, administratorType, 'administrator1');
         transaction.toUser = factory.newRelationship(namespace, studentType, 'student1');
+        transaction.authToken = ' ';
 
         businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Administrator cannot trade with Students, Faculty, or Administrators.');
     });
@@ -533,6 +538,7 @@ describe('#' + namespace, () => {
         transaction.amount = 50;
         transaction.fromUser = factory.newRelationship(namespace, administratorType, 'administrator1');
         transaction.toUser = factory.newRelationship(namespace, facultyType, 'faculty2');
+        transaction.authToken = ' ';
 
         businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Administrator cannot trade with Students, Faculty, or Administrators.');
     });
@@ -545,6 +551,7 @@ describe('#' + namespace, () => {
         transaction.amount = 50;
         transaction.fromUser = factory.newRelationship(namespace, administratorType, 'administrator1');
         transaction.toUser = factory.newRelationship(namespace, administratorType, 'administrator2');
+        transaction.authToken = ' ';
 
         businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction Failed. Administrator cannot trade with Students, Faculty, or Administrators.');
     });
@@ -558,6 +565,7 @@ describe('#' + namespace, () => {
         transaction.amount = student1.balance + 50;
         transaction.fromUser = factory.newRelationship(namespace, studentType, 'student1');
         transaction.toUser = factory.newRelationship(namespace, vendorType, 'vendor1');
+        transaction.authToken = ' ';
 
         await businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction failed. Insufficient funds.');
     });
@@ -578,16 +586,19 @@ describe('#' + namespace, () => {
         transaction1.amount = amtToSend;
         transaction1.fromUser = factory.newRelationship(namespace, studentType, 'student1');
         transaction1.toUser = factory.newRelationship(namespace, vendorType, 'vendor1');
+        transaction1.authToken = ' ';
 
         const transaction2 = factory.newTransaction(namespace, 'TransferFunds');
         transaction2.amount = amtToSend;
         transaction2.fromUser = factory.newRelationship(namespace, facultyType, 'faculty1');
         transaction2.toUser = factory.newRelationship(namespace, vendorType, 'vendor1');
+        transaction2.authToken = ' ';
 
         const transaction3 = factory.newTransaction(namespace, 'TransferFunds');
         transaction3.amount = amtToSend;
         transaction3.fromUser = factory.newRelationship(namespace, administratorType, 'administrator1');
         transaction3.toUser = factory.newRelationship(namespace, vendorType, 'vendor1');
+        transaction3.authToken = ' ';
 
 
         await businessNetworkConnection.submitTransaction(transaction1);
@@ -615,6 +626,7 @@ describe('#' + namespace, () => {
         transaction.amount = 50;
         transaction.fromUser = factory.newRelationship(namespace, studentType, 'studentInnactive');
         transaction.toUser = factory.newRelationship(namespace, vendorType, 'vendor1');
+        transaction.authToken = ' ';
 
         businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction failed. The sending account is inactive.');
     });
@@ -627,6 +639,7 @@ describe('#' + namespace, () => {
         transaction.amount = 50;
         transaction.fromUser = factory.newRelationship(namespace, studentType, 'student1');
         transaction.toUser = factory.newRelationship(namespace, vendorType, 'vendorInnactive');
+        transaction.authToken = ' ';
 
         businessNetworkConnection.submitTransaction(transaction).should.be.rejectedWith('Transaction failed. The receiving account is inactive.');
     });
@@ -693,24 +706,26 @@ describe('#' + namespace, () => {
 
         const transaction = factory.newTransaction(namespace, 'ChangeContactInfo');
         transaction.newFirst = 'firstnametest';
-        transaction.newLast = 'null';
-        transaction.newEmail = 'null';
-        transaction.newAdd = 'null';
-        transaction.newCity = 'null';
-        transaction.newState = 'null';
-        transaction.newZip = 'null';
+        transaction.newLast = '';
+        transaction.newEmail = '';
+        transaction.newAdd = '';
+        transaction.newCity = '';
+        transaction.newState = '';
+        transaction.newZip = '';
         transaction.user = factory.newRelationship(namespace, studentType, 'student1');
 
         await businessNetworkConnection.submitTransaction(transaction);
 
         const student1After = await studentRegistry.get('student1');
         student1After.contactInfo.firstName.should.equal(transaction.newFirst);
+
         student1After.contactInfo.lastName.should.equal(student1Before.contactInfo.lastName);
         student1After.contactInfo.email.should.equal(student1Before.contactInfo.email);
         student1After.contactInfo.address.should.equal(student1Before.contactInfo.address);
         student1After.contactInfo.city.should.equal(student1Before.contactInfo.city);
         student1After.contactInfo.state.should.equal(student1Before.contactInfo.state);
         student1After.contactInfo.zip.should.equal(student1Before.contactInfo.zip);
+
     });
 
     it('Users can update their last name independently', async () => {
@@ -720,13 +735,13 @@ describe('#' + namespace, () => {
         const student1Before = await studentRegistry.get('student1');
 
         const transaction = factory.newTransaction(namespace, 'ChangeContactInfo');
-        transaction.newFirst = 'null';
+        transaction.newFirst = '';
         transaction.newLast = 'lastnametest';
-        transaction.newEmail = 'null';
-        transaction.newAdd = 'null';
-        transaction.newCity = 'null';
-        transaction.newState = 'null';
-        transaction.newZip = 'null';
+        transaction.newEmail = '';
+        transaction.newAdd = '';
+        transaction.newCity = '';
+        transaction.newState = '';
+        transaction.newZip = '';
         transaction.user = factory.newRelationship(namespace, studentType, 'student1');
 
         await businessNetworkConnection.submitTransaction(transaction);
@@ -748,13 +763,13 @@ describe('#' + namespace, () => {
         const student1Before = await studentRegistry.get('student1');
 
         const transaction = factory.newTransaction(namespace, 'ChangeContactInfo');
-        transaction.newFirst = 'null';
-        transaction.newLast = 'null';
+        transaction.newFirst = '';
+        transaction.newLast = '';
         transaction.newEmail = 'emailtest';
-        transaction.newAdd = 'null';
-        transaction.newCity = 'null';
-        transaction.newState = 'null';
-        transaction.newZip = 'null';
+        transaction.newAdd = '';
+        transaction.newCity = '';
+        transaction.newState = '';
+        transaction.newZip = '';
         transaction.user = factory.newRelationship(namespace, studentType, 'student1');
 
         await businessNetworkConnection.submitTransaction(transaction);
@@ -776,13 +791,13 @@ describe('#' + namespace, () => {
         const student1Before = await studentRegistry.get('student1');
 
         const transaction = factory.newTransaction(namespace, 'ChangeContactInfo');
-        transaction.newFirst = 'null';
-        transaction.newLast = 'null';
-        transaction.newEmail = 'null';
+        transaction.newFirst = '';
+        transaction.newLast = '';
+        transaction.newEmail = '';
         transaction.newAdd = '100 Testing Drive';
-        transaction.newCity = 'null';
-        transaction.newState = 'null';
-        transaction.newZip = 'null';
+        transaction.newCity = '';
+        transaction.newState = '';
+        transaction.newZip = '';
         transaction.user = factory.newRelationship(namespace, studentType, 'student1');
 
         await businessNetworkConnection.submitTransaction(transaction);
@@ -804,13 +819,13 @@ describe('#' + namespace, () => {
         const student1Before = await studentRegistry.get('student1');
 
         const transaction = factory.newTransaction(namespace, 'ChangeContactInfo');
-        transaction.newFirst = 'null';
-        transaction.newLast = 'null';
-        transaction.newEmail = 'null';
-        transaction.newAdd = 'null';
+        transaction.newFirst = '';
+        transaction.newLast = '';
+        transaction.newEmail = '';
+        transaction.newAdd = '';
         transaction.newCity = 'citytest';
-        transaction.newState = 'null';
-        transaction.newZip = 'null';
+        transaction.newState = '';
+        transaction.newZip = '';
         transaction.user = factory.newRelationship(namespace, studentType, 'student1');
 
         await businessNetworkConnection.submitTransaction(transaction);
@@ -832,13 +847,13 @@ describe('#' + namespace, () => {
         const student1Before = await studentRegistry.get('student1');
 
         const transaction = factory.newTransaction(namespace, 'ChangeContactInfo');
-        transaction.newFirst = 'null';
-        transaction.newLast = 'null';
-        transaction.newEmail = 'null';
-        transaction.newAdd = 'null';
-        transaction.newCity = 'null';
+        transaction.newFirst = '';
+        transaction.newLast = '';
+        transaction.newEmail = '';
+        transaction.newAdd = '';
+        transaction.newCity = '';
         transaction.newState = 'statetest';
-        transaction.newZip = 'null';
+        transaction.newZip = '';
         transaction.user = factory.newRelationship(namespace, studentType, 'student1');
 
         await businessNetworkConnection.submitTransaction(transaction);
@@ -860,12 +875,12 @@ describe('#' + namespace, () => {
         const student1Before = await studentRegistry.get('student1');
 
         const transaction = factory.newTransaction(namespace, 'ChangeContactInfo');
-        transaction.newFirst = 'null';
-        transaction.newLast = 'null';
-        transaction.newEmail = 'null';
-        transaction.newAdd = 'null';
-        transaction.newCity = 'null';
-        transaction.newState = 'null';
+        transaction.newFirst = '';
+        transaction.newLast = '';
+        transaction.newEmail = '';
+        transaction.newAdd = '';
+        transaction.newCity = '';
+        transaction.newState = '';
         transaction.newZip = 'ziptest';
         transaction.user = factory.newRelationship(namespace, studentType, 'student1');
 
@@ -890,5 +905,5 @@ describe('#' + namespace, () => {
     it('Breaking Minimum Balance Threshold creates \'Low Balance Alert\' event.');
 
     it('Breaking Maximum Transaction Threshold creates \'Transaction Threshold Breach\' event.');
-    */
+
 });
