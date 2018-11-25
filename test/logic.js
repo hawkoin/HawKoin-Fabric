@@ -906,4 +906,6 @@ describe('#' + namespace, () => {
 
     it('Breaking Maximum Transaction Threshold creates \'Transaction Threshold Breach\' event.');
 
+    it('Submit a transaction using a demo AuthToken to verify the connection');
+
 });
