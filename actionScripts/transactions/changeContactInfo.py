@@ -52,18 +52,6 @@ def main(argv):
     
     userString = 'resource:org.hawkoin.network.' + userType + '#' + userID
 
-    # json_payload = {
-    #     "$class": "org.hawkoin.network.ChangeContactInfo",
-    #     "newFirst": newFirst,
-    #     "newLast": newLast,
-    #     "newEmail": newEmail,
-    #     "newAdd": newAddress,
-    #     "newCity": newCity,
-    #     "newState": newState,
-    #     "newZip": newZip,
-    #     "user": userString
-    # }
-
     json_payload = {
         "$class": "org.hawkoin.network.ChangeContactInfo",
         "newFirst": newFirst,
