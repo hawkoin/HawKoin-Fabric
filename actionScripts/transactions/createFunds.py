@@ -30,7 +30,8 @@ def main(argv):
             toID = arg
 
     
-    url = 'http://localhost:3000/api/org.hawkoin.network.CreateFunds'
+    # url = 'http://localhost:3000/api/org.hawkoin.network.CreateFunds'
+    url = 'http://35.224.160.182:3000/api/org.hawkoin.network.CreateFunds'
     
     toUser = 'resource:org.hawkoin.network.' + toType + '#' + toID
 

@@ -898,8 +898,6 @@ describe('#' + namespace, () => {
 
     it('Conduct high txn volume and ensure the total funds in network stays consistent');
 
-    it('Verify permissions. Only admin should be allowed to read/write to blockchain');
-
     it('Return participant\'s remaining balance. Should be stored in an event');
 
     it('Breaking Minimum Balance Threshold creates \'Low Balance Alert\' event.');

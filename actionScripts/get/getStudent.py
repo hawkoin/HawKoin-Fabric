@@ -21,7 +21,8 @@ def main(argv):
         elif opt in ("-i", "--id"):
             id = arg
     
-    url = 'http://localhost:3000/api/org.hawkoin.network.Student/' + id 
+    #url = 'http://localhost:3000/api/org.hawkoin.network.Student/' + id 
+    url = 'http://35.224.160.182:3000/api/org.hawkoin.network.Student/' + id
     
     try:
         response = requests.get(url)

@@ -98,7 +98,7 @@ event VelocityWarning {
 
 transaction ChangeTxnBreach {
  	o Double thresh
-    --> User user
+  --> User user
 }
 
 event LowBalanceAlert {
@@ -111,10 +111,10 @@ transaction ChangeLowBalAlert {
 }
 
 transaction TransferFunds {
-    o Double amount
-    o String authToken
-    --> User fromUser
-    --> User toUser
+  o Double amount
+  o String authToken
+  --> User fromUser
+  --> User toUser
 }
 
 transaction CreateFunds {
@@ -124,7 +124,7 @@ transaction CreateFunds {
 
 transaction DeleteFunds {
  	o Double amount
-    --> User fromUser
+  --> User fromUser
 }
 
 asset DemoMode identified by id {

@@ -48,7 +48,8 @@ def main(argv):
             newZip = arg
 
 
-    url = 'http://localhost:3000/api/org.hawkoin.network.ChangeContactInfo'
+    # url = 'http://localhost:3000/api/org.hawkoin.network.ChangeContactInfo'
+    url = 'http://35.224.160.182:3000/api/org.hawkoin.network.ChangeContactInfo'
     
     userString = 'resource:org.hawkoin.network.' + userType + '#' + userID
 

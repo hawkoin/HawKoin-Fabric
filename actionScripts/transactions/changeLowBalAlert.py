@@ -30,7 +30,8 @@ def main(argv):
             userID = arg
 
     
-    url = 'http://localhost:3000/api/org.hawkoin.network.ChangeLowBalAlert'
+    # url = 'http://localhost:3000/api/org.hawkoin.network.ChangeLowBalAlert'
+    url = 'http://35.224.160.182:3000/api/org.hawkoin.network.ChangeLowBalAlert'
     
     userString = 'resource:org.hawkoin.network.' + userType + '#' + userID
 

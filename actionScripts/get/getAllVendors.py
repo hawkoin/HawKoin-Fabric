@@ -5,7 +5,8 @@ import sys, getopt
 
 def main(argv):
     
-    url = 'http://localhost:3000/api/org.hawkoin.network.Vendor' 
+    # url = 'http://localhost:3000/api/org.hawkoin.network.Vendor'
+    url = 'http://35.224.160.182:3000/api/org.hawkoin.network.Vendor'
     
     try:
         response = requests.get(url)

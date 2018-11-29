@@ -34,7 +34,8 @@ def main(argv):
             dept = arg
 
     
-    url = 'http://localhost:3000/api/org.hawkoin.network.Faculty'
+    # url = 'http://localhost:3000/api/org.hawkoin.network.Faculty'
+    url = 'http://35.224.160.182:3000/api/org.hawkoin.network.Faculty'
     
 
     json_payload = {

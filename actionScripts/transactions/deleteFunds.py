@@ -30,7 +30,8 @@ def main(argv):
             fromID = arg
 
     
-    url = 'http://localhost:3000/api/org.hawkoin.network.DeleteFunds'
+    # url = 'http://localhost:3000/api/org.hawkoin.network.DeleteFunds'
+    url = 'http://35.224.160.182:3000/api/org.hawkoin.network.DeleteFunds'
     
     fromUser = 'resource:org.hawkoin.network.' + fromType + '#' + fromID
 

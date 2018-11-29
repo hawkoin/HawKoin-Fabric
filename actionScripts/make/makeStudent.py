@@ -37,7 +37,8 @@ def main(argv):
             isAthlete = arg
 
     
-    url = 'http://localhost:3000/api/org.hawkoin.network.Student'
+    # url = 'http://localhost:3000/api/org.hawkoin.network.Student'
+    url = 'http://35.224.160.182:3000/api/org.hawkoin.network.Student'
     
 
     json_payload = {

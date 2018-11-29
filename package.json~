@@ -1,0 +1,36 @@
+{
+  "engines": {
+    "composer": "^0.19.15"
+  },
+  "name": "hawkoin-network",
+  "version": "0.1.2",
+  "description": "na",
+  "scripts": {
+    "prepublish": "mkdirp ./dist && composer archive create --sourceType dir --sourceName . -a ./dist/hawkoin-network.bna",
+    "pretest": "npm run lint",
+    "lint": "eslint .",
+    "test": "nyc mocha -t 0 test/*.js && cucumber-js"
+  },
+  "keywords": [
+    "composer",
+    "composer-network"
+  ],
+  "author": "na",
+  "email": "na",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "chai": "latest",
+    "chai-as-promised": "latest",
+    "composer-admin": "latest",
+    "composer-cli": "latest",
+    "composer-client": "latest",
+    "composer-common": "latest",
+    "composer-connector-embedded": "latest",
+    "composer-cucumber-steps": "^0.20.4",
+    "cucumber": "^2.2.0",
+    "eslint": "latest",
+    "mkdirp": "latest",
+    "mocha": "latest",
+    "nyc": "latest"
+  }
+}

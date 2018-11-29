@@ -31,7 +31,8 @@ def main(argv):
             balance = arg
 
     
-    url = 'http://localhost:3000/api/org.hawkoin.network.Administrator'
+    # url = 'http://localhost:3000/api/org.hawkoin.network.Administrator'
+    url = 'http://35.224.160.182:3000/api/org.hawkoin.network.Administrator'
     
 
     json_payload = {
