@@ -3,7 +3,7 @@
     "composer": "^0.19.15"
   },
   "name": "hawkoin-network",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "na",
   "scripts": {
     "prepublish": "mkdirp ./dist && composer archive create --sourceType dir --sourceName . -a ./dist/hawkoin-network.bna",
@@ -26,7 +26,7 @@
     "composer-client": "latest",
     "composer-common": "latest",
     "composer-connector-embedded": "latest",
-    "composer-cucumber-steps": "^0.20.4",
+    "composer-cucumber-steps": "^0.20.9",
     "cucumber": "^2.2.0",
     "eslint": "latest",
     "mkdirp": "latest",
