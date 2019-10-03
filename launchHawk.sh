@@ -32,7 +32,7 @@ cd ~/HawKoin-Fabric/dist
 composer network install -a hawkoin-network.bna -c PeerAdmin@hlfv1
 
 # NOTE: -V needs to have the latest version in the project's package.json or the command will fail.
-composer network start -n hawkoin-network -V 0.1.4 -c PeerAdmin@hlfv1 -A admin -S adminpw -f networkadmin.card
+composer network start -n hawkoin-network -V 0.1.5 -c PeerAdmin@hlfv1 -A admin -S adminpw -f networkadmin.card
 
 composer card import --file networkadmin.card
 

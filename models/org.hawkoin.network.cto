@@ -55,7 +55,13 @@ enum Access {
   o VENDOR
 }
 
-
+enum Status {
+  o WAITING
+  o CANCELLED
+  o CONFIRMED
+  o COMPLETED
+  o FAILED
+}
 
 abstract participant User identified by id {
   o String id
@@ -129,4 +135,13 @@ transaction DeleteFunds {
 
 asset DemoMode identified by id {
   o String id
+}
+
+asset InProgress identified by id {
+    o String id
+    o Double amount
+    o Status status
+    o String authToken
+    --> User fromUser
+    --> User toUser
 }
